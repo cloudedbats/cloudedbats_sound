@@ -42,8 +42,10 @@ class PulsePeaksExtractor():
                                                   sampling_freq=sampling_freq_hz)
         # Freq. domain for detailed scanning.
         self.spectrum_narrow = dsp4bats.DbfsSpectrumUtil(window_size=512,
-                                                  window_function='kaiser',
-                                                  kaiser_beta=14,
+#                                                   window_function='hanning',
+                                                window_function='kaiser',
+                                                kaiser_beta=20,
+#                                                 kaiser_beta=14,
                                                   sampling_freq=sampling_freq_hz)
     
     def filter(self, signal, filter_low_hz=None, filter_high_hz=None):
@@ -75,15 +77,17 @@ class PulsePeaksExtractor():
     
     def extract_peaks(self, signal, 
                       factor_steps_per_s=10000, 
-                      min_valid_amp_limit_dbfs = -50):
+                      min_amp_level_dbfs = -50, 
+                      min_amp_level_relative = False):
         """ """
         # Settings.
         self.factor_steps_per_s = factor_steps_per_s # Factor is number of steps per sec.
         # Select the highest value of these. 
-        self.amp_limit_dbfs = max(min_valid_amp_limit_dbfs, self.filtered_noise_level_db)
-        # 
+        self.amp_limit_dbfs = min_amp_level_dbfs
+        if min_amp_level_relative:
+            self.amp_limit_dbfs = self.filtered_noise_level_db + min_amp_level_dbfs
+        #
         time_s = 0.0
-#         step_size_s = 1.0/self.factor_steps_per_s
         pulse_ix = 0
         time_start = 0.0
         index_space_counter = 0 # Used to separate pulses.
@@ -94,6 +98,9 @@ class PulsePeaksExtractor():
             jump = int(self.sampling_freq/self.factor_steps_per_s)
             # Create the spectrogram matrix.
             matrix = self.spectrum_narrow.calc_dbfs_matrix(signal, matrix_size=size, jump=jump)
+            
+            matrix = matrix - 10 
+            
             #
             for index, spectrum_dbfs in enumerate(matrix):
                 # Interpolate to get maximum freq and amp.
@@ -191,7 +198,7 @@ if __name__ == "__main__":
     signal_filtered = extractor.filter(signal, filter_low_hz=20000, filter_high_hz=100000)
     extractor.new_result_table()
     extractor.extract_peaks(signal_filtered)
-    extractor.save_result_table(file_path='pulse_peaks.txt')
+    extractor.save_result_table(file_path='../data/pulse_peaks.txt')
     
     # Plot.
     time = []
@@ -199,15 +206,16 @@ if __name__ == "__main__":
     amp = []
     for row in extractor.get_result_table():
         if row[0] == 1:
-            if row[3] > -100: # -100 means silent.
+#             if row[3] > -100: # -100 means silent.
                 time.append(float(row[1]))
                 freq.append(float(row[2]))
                 amp.append(float(row[3]))
     #
-    abs_min = abs(min(amp))
-    sizes = [((x+abs_min)**1.2) * 0.1 for x in amp]
+    amp_min = abs(min(amp))
+    sizes = [((x+amp_min)**1.2) * 0.1 for x in amp]
     
-    matplotlib.pyplot.scatter(time, freq, c=sizes, s=sizes, cmap='Blues')
+#     matplotlib.pyplot.scatter(time, freq, c=sizes, s=sizes, cmap='Blues')
+    matplotlib.pyplot.scatter(time, freq, c=amp, s=sizes, cmap='Reds')
     matplotlib.pyplot.show()
     
     print('\n')
