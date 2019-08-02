@@ -99,7 +99,7 @@ class PulsePeaksExtractor():
             # Create the spectrogram matrix.
             matrix = self.spectrum_narrow.calc_dbfs_matrix(signal, matrix_size=size, jump=jump)
             
-            matrix = matrix - 10 
+####            matrix = matrix - 10 
             
             #
             for index, spectrum_dbfs in enumerate(matrix):
@@ -107,6 +107,19 @@ class PulsePeaksExtractor():
                 freq_hz, amp = self.spectrum_narrow.interpolate_spectral_peak(spectrum_dbfs)
                 # Extract.
                 if amp >= self.amp_limit_dbfs:
+                    
+                    
+                    
+                    
+#                     # Standard deviation.
+#                     sdev = numpy.std(spectrum_dbfs)
+#                     smean = numpy.mean(spectrum_dbfs)
+#                     smax = numpy.max(spectrum_dbfs)
+#                     print('SDEV: ', sdev, '   MEAN: ', smean, '   MAX: ', smax)
+                    
+                    
+                    
+                    
                     index_space_counter = index_space_counter_start
                     time_s = time_start + index / self.factor_steps_per_s
                     #
@@ -170,9 +183,10 @@ if __name__ == "__main__":
     import matplotlib.pyplot
     
     """ """
-    print('PulseShapeExtractor test started. ',  datetime.datetime.now())
+    print('PulseShapeExtractor test_dynamic_canvas_OLD started. ',  datetime.datetime.now())
     
-    file_path = pathlib.Path('../data', 'test_chirp_generator.wav')
+#     file_path = pathlib.Path('../data', 'test_chirp_generator.wav')
+    file_path = pathlib.Path('../data', 'M004092.WAV')
     
     with wave.open(str(file_path), 'r') as wave_file:
         nchannels = wave_file.getnchannels() # 1=mono, 2=stereo.
@@ -188,7 +202,8 @@ if __name__ == "__main__":
             frame_rate_hz = framerate * 10
             lenght_s = int(nframes) / int(framerate) / 10
             
-        buffer_raw = wave_file.readframes(frame_rate_hz) # Max 1 sec.
+        buffer_raw = wave_file.readframes(int(nframes))
+#         buffer_raw = wave_file.readframes(frame_rate_hz) # Max 1 sec.
         signal = numpy.fromstring(buffer_raw, dtype=numpy.int16) / 32767
     
     print('frame_rate_hz: ', frame_rate_hz, ' lenght_s: ', lenght_s)
@@ -199,6 +214,8 @@ if __name__ == "__main__":
     extractor.new_result_table()
     extractor.extract_peaks(signal_filtered)
     extractor.save_result_table(file_path='../data/pulse_peaks.txt')
+    
+    print('Length: ', len(extractor.get_result_table()))
     
     # Plot.
     time = []
@@ -219,5 +236,5 @@ if __name__ == "__main__":
     matplotlib.pyplot.show()
     
     print('\n')
-    print('PulseShapeExtractor test ended. ',  datetime.datetime.now(), '\n')
+    print('PulseShapeExtractor test_dynamic_canvas_OLD ended. ',  datetime.datetime.now(), '\n')
     
