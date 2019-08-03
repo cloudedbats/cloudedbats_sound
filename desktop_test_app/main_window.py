@@ -90,15 +90,18 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def _createCentralWidget(self):
         """ """
+        wavefile_widget = desktop_test_app.WavefilesWidget()
         central_widget = desktop_test_app.PlottingWidget()
+        target_widget = desktop_test_app.TargetWidget()
+        
         
         splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
-        splitter.addWidget(QtWidgets.QWidget())
+        splitter.addWidget(wavefile_widget)
         splitter.addWidget(central_widget)  
-        splitter.addWidget(QtWidgets.QWidget())
-        splitter.setStretchFactor(0, 20)
-        splitter.setStretchFactor(1, 70)
-        splitter.setStretchFactor(2, 10)
+        splitter.addWidget(target_widget)
+        splitter.setStretchFactor(0, 5)
+        splitter.setStretchFactor(1, 90)
+        splitter.setStretchFactor(2, 5)
         #
 #         layout = QtWidgets.QHBoxLayout()
 #         layout.addWidget(splitter)
