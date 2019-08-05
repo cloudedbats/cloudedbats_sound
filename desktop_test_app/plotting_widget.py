@@ -102,7 +102,7 @@ class PlottingWidget(QtWidgets.QWidget):
         self.amp = []
         self.header = None
         #
-        pulse_peaks_path = pathlib.Path('data/pulse_peaks.txt')
+        pulse_peaks_path = pathlib.Path('wavefiles/pulse_peaks.txt')
         
         with pulse_peaks_path.open('r') as peaks_file:
             for row in peaks_file:
@@ -189,7 +189,17 @@ class PlottingWidget(QtWidgets.QWidget):
         self.axes = self.figure.add_subplot(111)
         scatter = self.axes.scatter(self.time, self.freq, c=self.amp, s=sizes, cmap='Reds')
         
-        self.figure.colorbar(scatter, ax=self.axes, label='dBFS')
+        
+        
+#         self.figure.colorbar(scatter, ax=self.axes, label='dBFS')
+#         self.figure.colorbar(scatter, ax=self.axes, label='dBFS', 
+#                              fraction=0.046, pad=0.1)
+        from mpl_toolkits import axes_grid1
+        divider = axes_grid1.make_axes_locatable(self.axes)
+        cax = divider.append_axes("right", size="1.5%", pad=0.1)
+        self.figure.colorbar(scatter, cax=cax, label='dBFS')
+        
+        
         #
         self.axes.set(ylim=(freq_min, freq_max),
                       xlim=(time_min, time_max),

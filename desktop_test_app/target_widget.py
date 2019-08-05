@@ -20,7 +20,7 @@ class TargetWidget(QtWidgets.QWidget):
         self.clear()
         
         # Widgets.
-        self.targetdir_edit = QtWidgets.QLineEdit('target')
+        self.targetdir_edit = QtWidgets.QLineEdit('wavefiles_target')
         self.targetdir_browse_button = QtWidgets.QPushButton('Browse...')
         self.targetdir_browse_button.clicked.connect(self.targetdir_browse)
         
@@ -32,9 +32,10 @@ class TargetWidget(QtWidgets.QWidget):
         self.action_combo.addItem('Rename wavefile')
         
         self.subdir_1_edit = QtWidgets.QLineEdit('check_more')
-        self.copy_subdir_1_button = QtWidgets.QPushButton('Copy (1)')
+        self.copy_subdir_1_button = QtWidgets.QPushButton('ctrl-1')
         self.copy_subdir_1_button.clicked.connect(self.copy_subdir_1)
         
+        ### Swedish genera:
         # Barbastella
         # Eptesicus
         # Myotis
@@ -44,39 +45,39 @@ class TargetWidget(QtWidgets.QWidget):
         # Vespertilio
         
         self.subdir_2_edit = QtWidgets.QLineEdit('barbastella')
-        self.copy_subdir_2_button = QtWidgets.QPushButton('Copy (2)')
+        self.copy_subdir_2_button = QtWidgets.QPushButton('ctrl-2')
         self.copy_subdir_2_button.clicked.connect(self.copy_subdir_2)
         
         self.subdir_3_edit = QtWidgets.QLineEdit('eptesicus')
-        self.copy_subdir_3_button = QtWidgets.QPushButton('Copy (3)')
+        self.copy_subdir_3_button = QtWidgets.QPushButton('ctrl-3')
         self.copy_subdir_3_button.clicked.connect(self.copy_subdir_3)
         
         self.subdir_4_edit = QtWidgets.QLineEdit('myotis')
-        self.copy_subdir_4_button = QtWidgets.QPushButton('Copy (4)')
+        self.copy_subdir_4_button = QtWidgets.QPushButton('ctrl-4')
         self.copy_subdir_4_button.clicked.connect(self.copy_subdir_4)
         
         self.subdir_5_edit = QtWidgets.QLineEdit('nyctalus')
-        self.copy_subdir_5_button = QtWidgets.QPushButton('Copy (5)')
+        self.copy_subdir_5_button = QtWidgets.QPushButton('ctrl-5')
         self.copy_subdir_5_button.clicked.connect(self.copy_subdir_5)
         
         self.subdir_6_edit = QtWidgets.QLineEdit('pipistrellus')
-        self.copy_subdir_6_button = QtWidgets.QPushButton('Copy (6)')
+        self.copy_subdir_6_button = QtWidgets.QPushButton('ctrl-6')
         self.copy_subdir_6_button.clicked.connect(self.copy_subdir_6)
         
         self.subdir_7_edit = QtWidgets.QLineEdit('plecotus')
-        self.copy_subdir_7_button = QtWidgets.QPushButton('Copy (7)')
+        self.copy_subdir_7_button = QtWidgets.QPushButton('ctrl-7')
         self.copy_subdir_7_button.clicked.connect(self.copy_subdir_7)
         
         self.subdir_8_edit = QtWidgets.QLineEdit('vespertilio')
-        self.copy_subdir_8_button = QtWidgets.QPushButton('Copy (8)')
+        self.copy_subdir_8_button = QtWidgets.QPushButton('ctrl-8')
         self.copy_subdir_8_button.clicked.connect(self.copy_subdir_8)
         
         self.subdir_9_edit = QtWidgets.QLineEdit('misc')
-        self.copy_subdir_9_button = QtWidgets.QPushButton('Copy (9)')
+        self.copy_subdir_9_button = QtWidgets.QPushButton('ctrl-9')
         self.copy_subdir_9_button.clicked.connect(self.copy_subdir_9)
         
         self.subdir_0_edit = QtWidgets.QLineEdit('trash')
-        self.copy_subdir_0_button = QtWidgets.QPushButton('Copy (0)')
+        self.copy_subdir_0_button = QtWidgets.QPushButton('ctrl-0')
         self.copy_subdir_0_button.clicked.connect(self.copy_subdir_0)
         
         
@@ -115,7 +116,7 @@ class TargetWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 5)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel('Sub directories (short key):'), gridrow, 0, 1, 5)
+        form1.addWidget(QtWidgets.QLabel('Target sub directories:'), gridrow, 0, 1, 5)
         gridrow += 1
         form1.addWidget(self.subdir_1_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_1_button, gridrow, 2, 1, 1)
@@ -205,4 +206,3 @@ class TargetWidget(QtWidgets.QWidget):
     def copy_subdir_9(self):
         """ """
     
-

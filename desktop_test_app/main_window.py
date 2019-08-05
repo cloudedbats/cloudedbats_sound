@@ -97,7 +97,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         splitter.addWidget(wavefile_widget)
-        splitter.addWidget(central_widget)  
+        splitter.addWidget(central_widget)
         splitter.addWidget(target_widget)
         splitter.setStretchFactor(0, 5)
         splitter.setStretchFactor(1, 90)
