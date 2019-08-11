@@ -216,7 +216,26 @@ class PlottingWidget(QtWidgets.QWidget):
         self.axes.grid(which='minor', linestyle='-', linewidth='0.5', alpha=0.2)
         #
         self.canvas.draw()
-
+    
+    
+    def zoom_in(self):
+        """ """
+        self.slider_zoom.setValue(self.slider_zoom.value() + 1)
+    
+    def zoom_out(self):
+        """ """
+        self.slider_zoom.setValue(self.slider_zoom.value() - 1)
+    
+    def scroll_left(self):
+        """ """
+        self.slider_center.setValue(self.slider_center.value() - 1)
+    
+    def scroll_right(self):
+        """ """
+        self.slider_center.setValue(self.slider_center.value() + 1)
+    
+    
+    
     def aaa_keyPressEvent(self, event):
             if event.key() == QtCore.Qt.Key_Right:
                 self.slider_center.setValue(self.slider_center.value() + 1)

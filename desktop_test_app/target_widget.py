@@ -24,15 +24,15 @@ class TargetWidget(QtWidgets.QWidget):
         self.targetdir_browse_button = QtWidgets.QPushButton('Browse...')
         self.targetdir_browse_button.clicked.connect(self.targetdir_browse)
         
-        self.action_combo = QtWidgets.QComboBox()
-        self.action_combo.setEditable(False)
-#         self.action_combo.setMinimumWidth(400)
-        self.action_combo.addItem('Copy to sub directory')
-        self.action_combo.addItem('Move to sub directory')
-        self.action_combo.addItem('Rename wavefile')
+#         self.action_combo = QtWidgets.QComboBox()
+#         self.action_combo.setEditable(False)
+# #         self.action_combo.setMinimumWidth(400)
+#         self.action_combo.addItem('Copy to subdirectory')
+#         self.action_combo.addItem('Move to subdirectory')
+#         self.action_combo.addItem('Rename wavefile')
         
         self.subdir_1_edit = QtWidgets.QLineEdit('check_more')
-        self.copy_subdir_1_button = QtWidgets.QPushButton('ctrl-1')
+        self.copy_subdir_1_button = QtWidgets.QPushButton('Alt+1')
         self.copy_subdir_1_button.clicked.connect(self.copy_subdir_1)
         
         ### Swedish genera:
@@ -45,57 +45,58 @@ class TargetWidget(QtWidgets.QWidget):
         # Vespertilio
         
         self.subdir_2_edit = QtWidgets.QLineEdit('barbastella')
-        self.copy_subdir_2_button = QtWidgets.QPushButton('ctrl-2')
+        self.copy_subdir_2_button = QtWidgets.QPushButton('Alt+2')
         self.copy_subdir_2_button.clicked.connect(self.copy_subdir_2)
         
         self.subdir_3_edit = QtWidgets.QLineEdit('eptesicus')
-        self.copy_subdir_3_button = QtWidgets.QPushButton('ctrl-3')
+        self.copy_subdir_3_button = QtWidgets.QPushButton('Alt+3')
         self.copy_subdir_3_button.clicked.connect(self.copy_subdir_3)
         
         self.subdir_4_edit = QtWidgets.QLineEdit('myotis')
-        self.copy_subdir_4_button = QtWidgets.QPushButton('ctrl-4')
+        self.copy_subdir_4_button = QtWidgets.QPushButton('Alt+4')
         self.copy_subdir_4_button.clicked.connect(self.copy_subdir_4)
         
         self.subdir_5_edit = QtWidgets.QLineEdit('nyctalus')
-        self.copy_subdir_5_button = QtWidgets.QPushButton('ctrl-5')
+        self.copy_subdir_5_button = QtWidgets.QPushButton('Alt+5')
         self.copy_subdir_5_button.clicked.connect(self.copy_subdir_5)
         
         self.subdir_6_edit = QtWidgets.QLineEdit('pipistrellus')
-        self.copy_subdir_6_button = QtWidgets.QPushButton('ctrl-6')
+        self.copy_subdir_6_button = QtWidgets.QPushButton('Alt+6')
         self.copy_subdir_6_button.clicked.connect(self.copy_subdir_6)
         
         self.subdir_7_edit = QtWidgets.QLineEdit('plecotus')
-        self.copy_subdir_7_button = QtWidgets.QPushButton('ctrl-7')
+        self.copy_subdir_7_button = QtWidgets.QPushButton('Alt+7')
         self.copy_subdir_7_button.clicked.connect(self.copy_subdir_7)
         
         self.subdir_8_edit = QtWidgets.QLineEdit('vespertilio')
-        self.copy_subdir_8_button = QtWidgets.QPushButton('ctrl-8')
+        self.copy_subdir_8_button = QtWidgets.QPushButton('Alt+8')
         self.copy_subdir_8_button.clicked.connect(self.copy_subdir_8)
         
         self.subdir_9_edit = QtWidgets.QLineEdit('misc')
-        self.copy_subdir_9_button = QtWidgets.QPushButton('ctrl-9')
+        self.copy_subdir_9_button = QtWidgets.QPushButton('Alt+9')
         self.copy_subdir_9_button.clicked.connect(self.copy_subdir_9)
         
         self.subdir_0_edit = QtWidgets.QLineEdit('trash')
-        self.copy_subdir_0_button = QtWidgets.QPushButton('ctrl-0')
+        self.copy_subdir_0_button = QtWidgets.QPushButton('Alt+0')
         self.copy_subdir_0_button.clicked.connect(self.copy_subdir_0)
         
         
-        self.view_overview_checkbox = QtWidgets.QCheckBox('Overview')
-        self.view_overview_checkbox.setChecked(False)
-        self.view_overview_checkbox.stateChanged.connect(self.view_changed)
+        self.deletefromsource_checkbox = QtWidgets.QCheckBox('Delete from source')
+        self.deletefromsource_checkbox.setChecked(False)
         
-        self.view_peakvalues_checkbox = QtWidgets.QCheckBox('Peak values')
-        self.view_peakvalues_checkbox.setChecked(True)
-        self.view_peakvalues_checkbox.stateChanged.connect(self.view_changed)
+        self.managetarget_button = QtWidgets.QPushButton('Manage target lists...')
         
-        self.view_compact_checkbox = QtWidgets.QCheckBox('Peaks compact')
-        self.view_compact_checkbox.setChecked(False)
-        self.view_compact_checkbox.stateChanged.connect(self.view_changed)
-        
-        self.view_metrics_checkbox = QtWidgets.QCheckBox('Metrics')
-        self.view_metrics_checkbox.setChecked(False)
-        self.view_metrics_checkbox.stateChanged.connect(self.view_changed)
+#         self.view_overview_checkbox = QtWidgets.QCheckBox('Overview')
+#         self.view_overview_checkbox.setChecked(False)
+#         self.view_overview_checkbox.stateChanged.connect(self.view_changed)
+#         
+#         self.view_compact_checkbox = QtWidgets.QCheckBox('Peaks compact')
+#         self.view_compact_checkbox.setChecked(False)
+#         self.view_compact_checkbox.stateChanged.connect(self.view_changed)
+#         
+#         self.view_metrics_checkbox = QtWidgets.QCheckBox('Metrics')
+#         self.view_metrics_checkbox.setChecked(False)
+#         self.view_metrics_checkbox.stateChanged.connect(self.view_changed)
         
         # Layout.
         form1 = QtWidgets.QGridLayout()
@@ -105,18 +106,10 @@ class TargetWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(self.targetdir_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.targetdir_browse_button, gridrow, 2, 1, 1)
-#         gridrow += 1
-#         form1.addWidget(self.copywavefile_button, gridrow, 0, 1, 1)
-        
-        gridrow += 1
-        label = QtWidgets.QLabel('Action:')
-        form1.addWidget(label, gridrow, 0, 1, 1)
-        form1.addWidget(self.action_combo, gridrow, 1, 1, 2)
-        
         gridrow += 1
         form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 5)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel('Target sub directories:'), gridrow, 0, 1, 5)
+        form1.addWidget(QtWidgets.QLabel('Target subdirectories:'), gridrow, 0, 1, 5)
         gridrow += 1
         form1.addWidget(self.subdir_1_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_1_button, gridrow, 2, 1, 1)
@@ -147,19 +140,12 @@ class TargetWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(self.subdir_0_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_0_button, gridrow, 2, 1, 1)
-        
+        gridrow += 1
+        form1.addWidget(self.deletefromsource_checkbox, gridrow, 0, 1, 3)        
         gridrow += 1
         form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 5)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel('View diagrams:'), gridrow, 0, 1, 5)
-        gridrow += 1
-        form1.addWidget(self.view_overview_checkbox, gridrow, 0, 1, 3)
-        gridrow += 1
-        form1.addWidget(self.view_peakvalues_checkbox, gridrow, 0, 1, 3)
-        gridrow += 1
-        form1.addWidget(self.view_compact_checkbox, gridrow, 0, 1, 3)
-        gridrow += 1
-        form1.addWidget(self.view_metrics_checkbox, gridrow, 0, 1, 3)
+        form1.addWidget(self.managetarget_button, gridrow, 0, 1, 1)
         
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(form1)
@@ -178,31 +164,42 @@ class TargetWidget(QtWidgets.QWidget):
     
     def copy_subdir_0(self):
         """ """
+        print('DEBUG: copy_subdir_0')
     
     def copy_subdir_1(self):
         """ """
+        print('DEBUG: copy_subdir_1')
     
     def copy_subdir_2(self):
         """ """
+        print('DEBUG: copy_subdir_2')
     
     def copy_subdir_3(self):
         """ """
+        print('DEBUG: copy_subdir_3')
     
     def copy_subdir_4(self):
         """ """
+        print('DEBUG: copy_subdir_4')
     
     def copy_subdir_5(self):
         """ """
+        print('DEBUG: copy_subdir_5')
     
     def copy_subdir_6(self):
         """ """
+        print('DEBUG: copy_subdir_6')
     
     def copy_subdir_7(self):
         """ """
+        print('DEBUG: copy_subdir_7')
     
     def copy_subdir_8(self):
         """ """
+        print('DEBUG: copy_subdir_8')
     
     def copy_subdir_9(self):
         """ """
+        print('DEBUG: copy_subdir_9')
     
+

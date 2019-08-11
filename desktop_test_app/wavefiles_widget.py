@@ -29,10 +29,18 @@ class WavefilesWidget(QtWidgets.QWidget):
         
         self.scanfiles_button = QtWidgets.QPushButton('Scan files...')
         self.scanfiles_button.clicked.connect(self.scan_files)
+        self.externalapp_button = QtWidgets.QPushButton('External app')
+        self.externalapp_button.setStatusTip(self.tr('The selected file will be opened in an external application.'))
+        self.externalapp_button.clicked.connect(self.external_app)
         
-##         self.wavefiles_tableview.clicked.connect(self.selected_survey_changed)
+        self.previous_button = QtWidgets.QPushButton('Previous')
+        self.previous_button.clicked.connect(self.previous_wavefile)
+        self.next_button = QtWidgets.QPushButton('Next')
+        self.next_button.clicked.connect(self.next_wavefile)
+        
+        # Action when selected wavefile has changed.
         self.wavefiles_tableview.getSelectionModel().selectionChanged.connect(self.selected_wavefile_changed)
-
+        
         # Layout.        
         form1 = QtWidgets.QGridLayout()
         gridrow = 0
@@ -44,7 +52,17 @@ class WavefilesWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(self.wavefiles_tableview, gridrow, 0, 1, 12)
         gridrow += 1
-        form1.addWidget(self.scanfiles_button, gridrow, 0, 1, 1)
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.addWidget(self.previous_button)
+        hlayout.addWidget(self.next_button)
+        hlayout.addStretch()
+        form1.addLayout(hlayout, gridrow, 0, 1, 12)
+        gridrow += 1
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.addWidget(self.scanfiles_button)
+        hlayout.addWidget(self.externalapp_button)
+        hlayout.addStretch()
+        form1.addLayout(hlayout, gridrow, 0, 1, 12)
         #
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(form1)
@@ -68,6 +86,8 @@ class WavefilesWidget(QtWidgets.QWidget):
         dirpath = dirdialog.getExistingDirectory()
         if dirpath:
             self.sourcedir_edit.setText(dirpath)
+        #
+        self.refresh_survey_list()
     
     def refresh_survey_list(self):
         """ """
@@ -102,6 +122,12 @@ class WavefilesWidget(QtWidgets.QWidget):
 #             if selected_survey_index is not None:
 #                 qt_index =self.wavefiles_tableview.model().index(selected_survey_index, 0)
 #                 self.wavefiles_tableview.setCurrentIndex(qt_index)
+            
+            qt_index = self.wavefiles_tableview.model().index(0, 0)
+            self.wavefiles_tableview.setCurrentIndex(qt_index)
+            
+            self.selected_wavefile_changed()
+
         finally:
             self.wavefiles_tableview.blockSignals(False)
             self.wavefiles_tableview.getSelectionModel().blockSignals(False)
@@ -115,38 +141,47 @@ class WavefilesWidget(QtWidgets.QWidget):
                 wavefile_name = str(self.wavefiles_tableview.model().index(modelIndex.row(), 0).data())
 #                 # Sync.
 #                 app_core.DesktopAppSync().set_selected_item_id(item_id)
+                print('Wavefile selected:', wavefile_name)
+            else:
+                print('Wavefile selected: - ')
+#                 app_core.DesktopAppSync().clear_selected_item_id()
         except Exception as e:
             debug_info = self.__class__.__name__ + ', row  ' + str(sys._getframe().f_lineno)
             desktop_test_app.Logging().error('Exception: (' + debug_info + '): ' + str(e))
-        
-        
-        print('Wavefile selected:', wavefile_name)
-        
+    
+    def previous_wavefile(self):
+        """ """
+        modelIndex = self.wavefiles_tableview.currentIndex()
+        if modelIndex.isValid() and (modelIndex.row() > 0):
+#             h5_survey = self.wavefiles_tableview.model().index(modelIndex.row(), 0).data()
+            qt_index = self.wavefiles_tableview.model().index(modelIndex.row() - 1, 0)
+            self.wavefiles_tableview.setCurrentIndex(qt_index)
+    
+    def next_wavefile(self):
+        """ """
+        modelIndex = self.wavefiles_tableview.currentIndex()
+        size = self.wavefiles_tableview.model().rowCount()
+
+        if modelIndex.isValid() and (modelIndex.row() < (size - 1)):
+#             h5_survey = self.wavefiles_tableview.model().index(modelIndex.row(), 0).data()
+            qt_index = self.wavefiles_tableview.model().index(modelIndex.row() + 1, 0)
+            self.wavefiles_tableview.setCurrentIndex(qt_index)
+    
     def scan_files(self):
         """ """
-        print('TODO: scan files...')
-        
-        import os
-        import subprocess
+     
+    def external_app(self):
+        """ """
+        path_to_app = '/usr/bin/sonic-visualiser'
         
         modelIndex = self.wavefiles_tableview.currentIndex()
         if modelIndex.isValid():
             wavefile_name = str(self.wavefiles_tableview.model().index(modelIndex.row(), 0).data())
-            
-            wavefile_path = str(pathlib.Path(str(self.sourcedir_edit.text()), wavefile_name))
-            
-            print('Wavefile selected:', wavefile_path)
-            
-#             os.system('open ' + str(wavefile_path))
-# #             os.system('start ' + wavefile_name ) # Windows.
+            wavefile_path = str(pathlib.Path(str(self.sourcedir_edit.text()), wavefile_name))            
+            print('Wavefile selected:', wavefile_path, ' Path to external app: ', path_to_app)
+            if (wavefile_path):
+                process = QtCore.QProcess(self)
+    #             process.start(path_to_app, [wavefile_path, wavefile_path])
+                process.start(path_to_app, [wavefile_path])
 
-            
-            path_to_app = '/usr/bin/sonic-visualiser'
-#             '/var/lib/snapd/desktop/applications/Audacity'
-            
-            subprocess.Popen([path_to_app, wavefile_path])
-            
-        
-        
-        
 

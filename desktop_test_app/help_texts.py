@@ -37,15 +37,15 @@ class HelpTexts(object):
         self._texts['about'] = """
         <p>
         <b>CloudedBats - Desktop test application</b> <br>
-        ###version###
         </p>
         <p>
-        This test application is a part of the open source 
+        This test application is a part of the open <br>
+        source 
         <a href="http://cloudedbats.org">CloudedBats.org</a>
         software project.
         </p>
         <p>
-        More information and source code at GitHub: 
+        More information and source code at GitHub: <br>
         <a href="https://github.com/cloudedbats/cloudedbats_sound"> cloudedbats_sound</a>.
         </p>
         <p>
