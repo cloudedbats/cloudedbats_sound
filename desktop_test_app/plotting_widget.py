@@ -22,8 +22,6 @@ class PlottingWidget(QtWidgets.QWidget):
         #
         self.clear()
         # Widgets.
-        self.button = QtWidgets.QPushButton('Update')
-        self.button.clicked.connect(self.update)
         # Plot.
         self.plot_setup()
         
@@ -39,29 +37,67 @@ class PlottingWidget(QtWidgets.QWidget):
         #
         self.slider_center.setValue(50.0)
         self.slider_zoom.setValue(0.0)
+        
+        
+        self.hidesilent_checkbox = QtWidgets.QCheckBox('Hide silent parts')
+        self.hidesilent_checkbox.setChecked(True)
+        
+        self.maxfreq_combo = QtWidgets.QComboBox()
+        self.maxfreq_combo.setEditable(False)
+#         self.maxfreq_combo.setMinimumWidth(400)
+        self.maxfreq_combo.addItem('Nyquist/2')
+        self.maxfreq_combo.addItem('50')
+        self.maxfreq_combo.addItem('80')
+        self.maxfreq_combo.addItem('100')
+        self.maxfreq_combo.addItem('150')
+        self.maxfreq_combo.addItem('200')
+        self.maxfreq_combo.addItem('250')
+        
+        self.reset_button = QtWidgets.QPushButton('Reset')
+#         self.reset_button.clicked.connect(self.sourcedir_browse)
+
+        
+        self.autoreset_checkbox = QtWidgets.QCheckBox('Auto reset')
+        self.autoreset_checkbox.setChecked(True)
+
+        
+        
+        
         # Layout.
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.slider_center)
-        layout.addWidget(self.slider_zoom)
-        layout.addWidget(self.button)
+        layout.addWidget(self.toolbar, 1)
+        layout.addWidget(self.canvas, 100)
         
+        form1 = QtWidgets.QGridLayout()
+        gridrow = 0
+        label = QtWidgets.QLabel('Scroll:')
+        form1.addWidget(label, gridrow, 0, 1, 1)
+        form1.addWidget(self.slider_center, gridrow, 1, 1, 18)
+        form1.addWidget(self.reset_button, gridrow, 19, 1, 1)
+        gridrow += 1
+        label = QtWidgets.QLabel('Zoom:')
+        form1.addWidget(label, gridrow, 0, 1, 1)
+        form1.addWidget(self.slider_zoom, gridrow, 1, 1, 18)
+        form1.addWidget(self.autoreset_checkbox, gridrow, 19, 1, 1)
+        gridrow += 1
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.addWidget(self.hidesilent_checkbox)
+        hlayout.addWidget(QtWidgets.QLabel('Max frequency:'))
+        hlayout.addWidget(self.maxfreq_combo)
+        hlayout.addStretch()
+#         hlayout.addWidget(self.autoreset_checkbox)
+#         hlayout.addWidget(self.scanfiles_button)
+#         hlayout.addWidget(self.scanfiles_button)
+#         hlayout.addWidget(self.scanfiles_button)
+#         hlayout.addWidget(self.scanfiles_button)
+#         hlayout.addStretch()
+        form1.addLayout(hlayout, gridrow, 0, 1, 20)
+        
+        layout.addLayout(form1, 1)
         
         self.setLayout(layout)
-        
-        
-        #
-        
-#         for child in self.findChildren(name='*'):
-#             print('Child: ', child)
-        
-#         self.keyPressEvent = self.aaa_keyPressEvent
-        self.button.keyPressEvent = self.aaa_keyPressEvent
-#         self.slider_center.keyPressEvent = self.aaa_keyPressEvent
-#         self.slider_zoom.keyPressEvent = self.aaa_keyPressEvent
-        #
-#         self.update()
+#         #        
+#         self.button.keyPressEvent = self.test_keyPressEvent
         
     def clear(self):
         self.time = []
@@ -76,12 +112,6 @@ class PlottingWidget(QtWidgets.QWidget):
         self.toolbar = backend_qt5agg.NavigationToolbar2QT(self.canvas, self)
         self.figure.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1)
         self.axes = self.figure.add_subplot(111)
-
-#         axcolor = 'lightgoldenrodyellow'
-#         axfreq = self.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
-#         axamp = self.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
-#         sfreq = widgets.Slider(axfreq, 'Zoom', 0.0, 100.0, valinit=50.0)
-#         samp = widgets.Slider(axamp, 'Time', 0.0, 100.0, valinit=50.0)
     
     def update(self):
         """ """
@@ -189,8 +219,6 @@ class PlottingWidget(QtWidgets.QWidget):
         self.axes = self.figure.add_subplot(111)
         scatter = self.axes.scatter(self.time, self.freq, c=self.amp, s=sizes, cmap='Reds')
         
-        
-        
 #         self.figure.colorbar(scatter, ax=self.axes, label='dBFS')
 #         self.figure.colorbar(scatter, ax=self.axes, label='dBFS', 
 #                              fraction=0.046, pad=0.1)
@@ -198,8 +226,6 @@ class PlottingWidget(QtWidgets.QWidget):
         divider = axes_grid1.make_axes_locatable(self.axes)
         cax = divider.append_axes("right", size="1.5%", pad=0.1)
         self.figure.colorbar(scatter, cax=cax, label='dBFS')
-        
-        
         #
         self.axes.set(ylim=(freq_min, freq_max),
                       xlim=(time_min, time_max),
@@ -211,12 +237,11 @@ class PlottingWidget(QtWidgets.QWidget):
         minor_yticks = numpy.arange(0, freq_max, 5)
         self.axes.set_yticks(major_yticks)
         self.axes.set_yticks(minor_yticks, minor=True)
-
+        
         self.axes.grid(which='major', linestyle='-', linewidth='0.5', alpha=0.5)
         self.axes.grid(which='minor', linestyle='-', linewidth='0.5', alpha=0.2)
         #
         self.canvas.draw()
-    
     
     def zoom_in(self):
         """ """
@@ -234,17 +259,16 @@ class PlottingWidget(QtWidgets.QWidget):
         """ """
         self.slider_center.setValue(self.slider_center.value() + 1)
     
-    
-    
-    def aaa_keyPressEvent(self, event):
-            if event.key() == QtCore.Qt.Key_Right:
-                self.slider_center.setValue(self.slider_center.value() + 1)
-            elif event.key() == QtCore.Qt.Key_Left:
-                self.slider_center.setValue(self.slider_center.value() - 1)
-            elif event.key() == QtCore.Qt.Key_Up:
-                self.slider_zoom.setValue(self.slider_zoom.value() + 1)
-            elif event.key() == QtCore.Qt.Key_Down:
-                self.slider_zoom.setValue(self.slider_zoom.value() - 1)
-            else:
-#                 super().keyPressEvent(event)
-                self.keyPressEvent(event)
+#     def test_keyPressEvent(self, event):
+#             if event.key() == QtCore.Qt.Key_Right:
+#                 self.slider_center.setValue(self.slider_center.value() + 1)
+#             elif event.key() == QtCore.Qt.Key_Left:
+#                 self.slider_center.setValue(self.slider_center.value() - 1)
+#             elif event.key() == QtCore.Qt.Key_Up:
+#                 self.slider_zoom.setValue(self.slider_zoom.value() + 1)
+#             elif event.key() == QtCore.Qt.Key_Down:
+#                 self.slider_zoom.setValue(self.slider_zoom.value() - 1)
+#             else:
+# #                 super().keyPressEvent(event)
+#                 self.keyPressEvent(event)
+

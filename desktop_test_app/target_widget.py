@@ -84,7 +84,12 @@ class TargetWidget(QtWidgets.QWidget):
         self.deletefromsource_checkbox = QtWidgets.QCheckBox('Delete from source')
         self.deletefromsource_checkbox.setChecked(False)
         
-        self.managetarget_button = QtWidgets.QPushButton('Manage target lists...')
+        self.targetlists_combo = QtWidgets.QComboBox()
+        self.targetlists_combo.setEditable(False)
+#         self.targetlists_combo.setMinimumWidth(400)
+        self.targetlists_combo.addItem('default')
+
+        self.managetargetlists_button = QtWidgets.QPushButton('Manage lists...')
         
 #         self.view_overview_checkbox = QtWidgets.QCheckBox('Overview')
 #         self.view_overview_checkbox.setChecked(False)
@@ -107,9 +112,9 @@ class TargetWidget(QtWidgets.QWidget):
         form1.addWidget(self.targetdir_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.targetdir_browse_button, gridrow, 2, 1, 1)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 5)
+        form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 3)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel('Target subdirectories:'), gridrow, 0, 1, 5)
+        form1.addWidget(QtWidgets.QLabel('Target subdirectories:'), gridrow, 0, 1, 3)
         gridrow += 1
         form1.addWidget(self.subdir_1_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_1_button, gridrow, 2, 1, 1)
@@ -141,11 +146,15 @@ class TargetWidget(QtWidgets.QWidget):
         form1.addWidget(self.subdir_0_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_0_button, gridrow, 2, 1, 1)
         gridrow += 1
-        form1.addWidget(self.deletefromsource_checkbox, gridrow, 0, 1, 3)        
+        form1.addWidget(self.deletefromsource_checkbox, gridrow, 0, 1, 3)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 5)
+        form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 3)
         gridrow += 1
-        form1.addWidget(self.managetarget_button, gridrow, 0, 1, 1)
+        form1.addWidget(QtWidgets.QLabel('Target lists:'), gridrow, 0, 1, 3)
+        gridrow += 1
+        form1.addWidget(self.targetlists_combo, gridrow, 0, 1, 2)
+        gridrow += 1
+        form1.addWidget(self.managetargetlists_button, gridrow, 0, 1, 1)
         
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(form1)
