@@ -86,8 +86,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self._action.addSeparator()
         self._action.addAction(self._zoom_in)
         self._action.addAction(self._zoom_out)
-        self._action.addAction(self._scrollright)
         self._action.addAction(self._scrollleft)
+        self._action.addAction(self._scrollright)
         self._action.addSeparator()
         self._action.addAction(self._previous)
         self._action.addAction(self._next)
@@ -117,6 +117,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.central_widget = desktop_test_app.PlottingWidget()
         self.target_widget = desktop_test_app.TargetWidget()
         
+        self.wavefile_widget.set_widgets(plotting_widget=self.central_widget,
+                                         target_widget=self.target_widget)
+        
         splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         splitter.addWidget(self.wavefile_widget)
         splitter.addWidget(self.central_widget)
@@ -130,7 +133,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.setCentralWidget(splitter)
         
-        self.central_widget.update()
+#         self.central_widget.update()
+        self.wavefile_widget.refresh_wavefile_list()
         
 #         self._activitystack = QtWidgets.QStackedLayout()
 #         # Layout widgets.
@@ -152,14 +156,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self._quitaction.triggered.connect(self.close)
         
         # Central widget.
-        self._zoom_in = QtWidgets.QAction(self.tr('Zoom in'), self)
+        self._zoom_in = QtWidgets.QAction(self.tr('Horizontal zoom in'), self)
         self._zoom_in.setShortcut(self.tr('Alt+Shift+Up'))
-        self._zoom_in.setStatusTip(self.tr('Zoom in'))
+        self._zoom_in.setStatusTip(self.tr('Horizontal zoom in'))
         self._zoom_in.triggered.connect(self.central_widget.zoom_in)
         
-        self._zoom_out = QtWidgets.QAction(self.tr('Zoom out'), self)
+        self._zoom_out = QtWidgets.QAction(self.tr('Horizontal zoom out'), self)
         self._zoom_out.setShortcut(self.tr('Alt+Shift+Down'))
-        self._zoom_out.setStatusTip(self.tr('Zoom out'))
+        self._zoom_out.setStatusTip(self.tr('v out'))
         self._zoom_out.triggered.connect(self.central_widget.zoom_out)
         
         self._scrollright = QtWidgets.QAction(self.tr('Scroll right'), self)

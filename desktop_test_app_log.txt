@@ -1,0 +1,2 @@
+CloudedBats.org 2019-08-17 01:34:502019-08-17 01:42:54: ERROR: Exception: (WavefilesWidget, row  164): expected str, bytes or os.PathLike object, not NoneType
+2019-08-17 01:43:00: ERROR: Exception: (WavefilesWidget, row  164): expected str, bytes or os.PathLike object, not NoneType

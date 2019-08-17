@@ -8,6 +8,7 @@ import sys
 import numpy
 import pathlib
 from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from matplotlib.backends import backend_qt5agg
@@ -18,12 +19,18 @@ class PlottingWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         """ """
         super().__init__(parent)
-#         self.setMinimumSize(1500, 700)
-        #
+        
+        self.selected_wavefile_path = None
+        
         self.clear()
         # Widgets.
         # Plot.
         self.plot_setup()
+        
+        self.wavefile_label = QtWidgets.QLabel('Selected wavefile: ')
+        self.wavefile_name_label = QtWidgets.QLabel('')
+        font = QtGui.QFont('Helvetica', pointSize=-1, weight=QtGui.QFont.Bold)
+        self.wavefile_name_label.setFont(font)
         
         self.slider_center = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.slider_center.setFocusPolicy (QtCore.Qt.NoFocus)
@@ -38,9 +45,13 @@ class PlottingWidget(QtWidgets.QWidget):
         self.slider_center.setValue(50.0)
         self.slider_zoom.setValue(0.0)
         
+        self.usetoolbar_checkbox = QtWidgets.QCheckBox('Navigation toolbar')
+        self.usetoolbar_checkbox.setChecked(False)
+        self.usetoolbar_checkbox.stateChanged.connect(self.usetoolbar_changed)
         
-        self.hidesilent_checkbox = QtWidgets.QCheckBox('Hide silent parts')
-        self.hidesilent_checkbox.setChecked(True)
+        self.compactview_checkbox = QtWidgets.QCheckBox('Compact view')
+        self.compactview_checkbox.setChecked(True)
+        self.compactview_checkbox.stateChanged.connect(self.compactview_changed)
         
         self.maxfreq_combo = QtWidgets.QComboBox()
         self.maxfreq_combo.setEditable(False)
@@ -54,34 +65,38 @@ class PlottingWidget(QtWidgets.QWidget):
         self.maxfreq_combo.addItem('250')
         
         self.reset_button = QtWidgets.QPushButton('Reset')
-#         self.reset_button.clicked.connect(self.sourcedir_browse)
-
+        self.reset_button.clicked.connect(self.reset)
         
         self.autoreset_checkbox = QtWidgets.QCheckBox('Auto reset')
         self.autoreset_checkbox.setChecked(True)
-
-        
-        
         
         # Layout.
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.toolbar, 1)
+
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.addWidget(self.wavefile_label)
+        hlayout.addWidget(self.wavefile_name_label, 100)
+        layout.addLayout(hlayout)
+        
         layout.addWidget(self.canvas, 100)
         
         form1 = QtWidgets.QGridLayout()
         gridrow = 0
-        label = QtWidgets.QLabel('Scroll:')
-        form1.addWidget(label, gridrow, 0, 1, 1)
+        form1.addWidget(self.toolbar, gridrow, 0, 1, 20)
+        
+        self.hscroll_label = QtWidgets.QLabel('Horizontal scroll:')
+        form1.addWidget(self.hscroll_label, gridrow, 0, 1, 1)
         form1.addWidget(self.slider_center, gridrow, 1, 1, 18)
         form1.addWidget(self.reset_button, gridrow, 19, 1, 1)
         gridrow += 1
-        label = QtWidgets.QLabel('Zoom:')
-        form1.addWidget(label, gridrow, 0, 1, 1)
+        self.hzoom_label = QtWidgets.QLabel('Horizontal zoom:')
+        form1.addWidget(self.hzoom_label, gridrow, 0, 1, 1)
         form1.addWidget(self.slider_zoom, gridrow, 1, 1, 18)
         form1.addWidget(self.autoreset_checkbox, gridrow, 19, 1, 1)
         gridrow += 1
         hlayout = QtWidgets.QHBoxLayout()
-        hlayout.addWidget(self.hidesilent_checkbox)
+        hlayout.addWidget(self.usetoolbar_checkbox)
+        hlayout.addWidget(self.compactview_checkbox)
         hlayout.addWidget(QtWidgets.QLabel('Max frequency:'))
         hlayout.addWidget(self.maxfreq_combo)
         hlayout.addStretch()
@@ -95,6 +110,9 @@ class PlottingWidget(QtWidgets.QWidget):
         
         layout.addLayout(form1, 1)
         
+        # Updeate visibility.
+        self.usetoolbar_changed()
+        
         self.setLayout(layout)
 #         #        
 #         self.button.keyPressEvent = self.test_keyPressEvent
@@ -104,6 +122,23 @@ class PlottingWidget(QtWidgets.QWidget):
         self.freq = []
         self.amp = []
         self.header = None
+        
+    def set_selected_wavefile(self, wavefile_path):
+        """ """
+        self.selected_wavefile_path = pathlib.Path(wavefile_path)
+        self.wavefile_name_label.setText(str(self.selected_wavefile_path.name))
+        self.update()
+    
+    def reset(self):
+        """ """
+        self.slider_center.setValue(50.0)
+        self.slider_zoom.setValue(0.0)
+        
+#         toolbar = self.canvas.toolbar # Get the toolbar handler
+        self.toolbar.update()
+        
+        self.update()
+#         self.plot_redraw()
     
     def plot_setup(self):
         """ """
@@ -115,9 +150,12 @@ class PlottingWidget(QtWidgets.QWidget):
     
     def update(self):
         """ """
-        self.settings()
-        self.data()
-        self.plot()
+        if self.selected_wavefile_path:
+            self.settings()
+            self.data()
+            self.plot()
+        else:
+            self.figure.clear()
     
     def settings(self):
         """ """
@@ -177,7 +215,6 @@ class PlottingWidget(QtWidgets.QWidget):
         self.axes.set_xlim(time_min_new, time_max_new)
         
         self.canvas.draw_idle()
-    
     
     def plot(self):
         """ """
@@ -258,6 +295,32 @@ class PlottingWidget(QtWidgets.QWidget):
     def scroll_right(self):
         """ """
         self.slider_center.setValue(self.slider_center.value() + 1)
+    
+    def usetoolbar_changed(self):
+        """ """
+        self.reset()
+        if self.usetoolbar_checkbox.isChecked():
+            self.hscroll_label.hide()
+            self.hzoom_label.hide()
+            self.slider_center.hide()
+            self.reset_button.hide()
+            self.slider_zoom.hide()
+            self.autoreset_checkbox.hide()
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
+            self.hscroll_label.show()
+            self.hzoom_label.show()
+            self.slider_center.show()
+            self.reset_button.show()
+            self.slider_zoom.show()
+            self.autoreset_checkbox.show()
+        #
+        self.plot_redraw()
+    
+    def compactview_changed(self):
+        """ """
+
     
 #     def test_keyPressEvent(self, event):
 #             if event.key() == QtCore.Qt.Key_Right:

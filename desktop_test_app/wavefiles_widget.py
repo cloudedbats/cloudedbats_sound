@@ -18,9 +18,12 @@ class WavefilesWidget(QtWidgets.QWidget):
         super().__init__(parent)
         self.clear()
         
+        self.plotting_widget=None
+        self.target_widget=None
+        
         # Widgets.
         self.sourcedir_edit = QtWidgets.QLineEdit('wavefiles')
-        self.sourcedir_edit.textChanged.connect(self.refresh_survey_list)
+        self.sourcedir_edit.textChanged.connect(self.refresh_wavefile_list)
         self.sourcedir_button = QtWidgets.QPushButton('Browse...')
         self.sourcedir_button.clicked.connect(self.sourcedir_browse)
         
@@ -69,11 +72,17 @@ class WavefilesWidget(QtWidgets.QWidget):
         #
         self.setLayout(layout)
         
-        # List available wavefiles.
-        self.refresh_survey_list()
+#         # List available wavefiles.
+#         self.refresh_wavefile_list()
         
     def clear(self):
         """ """
+    
+    def set_widgets(self, plotting_widget=None, target_widget=None):
+        """ """
+        self.plotting_widget=plotting_widget
+        self.target_widget=target_widget
+
     
     def sourcedir_browse(self):
         """ """
@@ -87,9 +96,9 @@ class WavefilesWidget(QtWidgets.QWidget):
         if dirpath:
             self.sourcedir_edit.setText(dirpath)
         #
-        self.refresh_survey_list()
+        self.refresh_wavefile_list()
     
-    def refresh_survey_list(self):
+    def refresh_wavefile_list(self):
         """ """
         try:
             self.wavefiles_tableview.blockSignals(True)
@@ -139,12 +148,18 @@ class WavefilesWidget(QtWidgets.QWidget):
             modelIndex = self.wavefiles_tableview.currentIndex()
             if modelIndex.isValid():
                 wavefile_name = str(self.wavefiles_tableview.model().index(modelIndex.row(), 0).data())
-#                 # Sync.
-#                 app_core.DesktopAppSync().set_selected_item_id(item_id)
+                wavefile_path = pathlib.Path(str(self.sourcedir_edit.text()), wavefile_name)
                 print('Wavefile selected:', wavefile_name)
+                if self.plotting_widget:
+                    self.plotting_widget.set_selected_wavefile(wavefile_path)
+                if self.target_widget:
+                    self.target_widget.set_selected_wavefile(wavefile_path)
             else:
                 print('Wavefile selected: - ')
-#                 app_core.DesktopAppSync().clear_selected_item_id()
+                if self.plotting_widget:
+                    self.plotting_widget.set_selected_wavefile(None)
+                if self.target_widget:
+                    self.target_widget.set_selected_wavefile(None)
         except Exception as e:
             debug_info = self.__class__.__name__ + ', row  ' + str(sys._getframe().f_lineno)
             desktop_test_app.Logging().error('Exception: (' + debug_info + '): ' + str(e))

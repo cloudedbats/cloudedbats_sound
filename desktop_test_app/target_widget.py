@@ -4,13 +4,8 @@
 # Copyright (c) 2019 Arnold Andreasson 
 # License: MIT License (see LICENSE.txt or http://opensource.org/licenses/mit).
 
-import sys
-import numpy
-import pathlib
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
-
-import desktop_test_app
 
 class TargetWidget(QtWidgets.QWidget):
     """ """
@@ -19,30 +14,16 @@ class TargetWidget(QtWidgets.QWidget):
         super().__init__(parent)
         self.clear()
         
+        self.selected_wavefile_path = None
+        
         # Widgets.
         self.targetdir_edit = QtWidgets.QLineEdit('wavefiles_target')
         self.targetdir_browse_button = QtWidgets.QPushButton('Browse...')
         self.targetdir_browse_button.clicked.connect(self.targetdir_browse)
         
-#         self.action_combo = QtWidgets.QComboBox()
-#         self.action_combo.setEditable(False)
-# #         self.action_combo.setMinimumWidth(400)
-#         self.action_combo.addItem('Copy to subdirectory')
-#         self.action_combo.addItem('Move to subdirectory')
-#         self.action_combo.addItem('Rename wavefile')
-        
-        self.subdir_1_edit = QtWidgets.QLineEdit('check_more')
+        self.subdir_1_edit = QtWidgets.QLineEdit('unidentified')
         self.copy_subdir_1_button = QtWidgets.QPushButton('Alt+1')
         self.copy_subdir_1_button.clicked.connect(self.copy_subdir_1)
-        
-        ### Swedish genera:
-        # Barbastella
-        # Eptesicus
-        # Myotis
-        # Nyctalus
-        # Pipistrellus
-        # Plecotus
-        # Vespertilio
         
         self.subdir_2_edit = QtWidgets.QLineEdit('barbastella')
         self.copy_subdir_2_button = QtWidgets.QPushButton('Alt+2')
@@ -80,7 +61,6 @@ class TargetWidget(QtWidgets.QWidget):
         self.copy_subdir_0_button = QtWidgets.QPushButton('Alt+0')
         self.copy_subdir_0_button.clicked.connect(self.copy_subdir_0)
         
-        
         self.deletefromsource_checkbox = QtWidgets.QCheckBox('Delete from source')
         self.deletefromsource_checkbox.setChecked(False)
         
@@ -90,18 +70,6 @@ class TargetWidget(QtWidgets.QWidget):
         self.targetlists_combo.addItem('default')
 
         self.managetargetlists_button = QtWidgets.QPushButton('Manage lists...')
-        
-#         self.view_overview_checkbox = QtWidgets.QCheckBox('Overview')
-#         self.view_overview_checkbox.setChecked(False)
-#         self.view_overview_checkbox.stateChanged.connect(self.view_changed)
-#         
-#         self.view_compact_checkbox = QtWidgets.QCheckBox('Peaks compact')
-#         self.view_compact_checkbox.setChecked(False)
-#         self.view_compact_checkbox.stateChanged.connect(self.view_changed)
-#         
-#         self.view_metrics_checkbox = QtWidgets.QCheckBox('Metrics')
-#         self.view_metrics_checkbox.setChecked(False)
-#         self.view_metrics_checkbox.stateChanged.connect(self.view_changed)
         
         # Layout.
         form1 = QtWidgets.QGridLayout()
@@ -114,7 +82,7 @@ class TargetWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(QtWidgets.QLabel(''), gridrow, 0, 1, 3)
         gridrow += 1
-        form1.addWidget(QtWidgets.QLabel('Target subdirectories:'), gridrow, 0, 1, 3)
+        form1.addWidget(QtWidgets.QLabel('Copy to subdirectories:'), gridrow, 0, 1, 3)
         gridrow += 1
         form1.addWidget(self.subdir_1_edit, gridrow, 0, 1, 2)
         form1.addWidget(self.copy_subdir_1_button, gridrow, 2, 1, 1)
@@ -152,7 +120,7 @@ class TargetWidget(QtWidgets.QWidget):
         gridrow += 1
         form1.addWidget(QtWidgets.QLabel('Target lists:'), gridrow, 0, 1, 3)
         gridrow += 1
-        form1.addWidget(self.targetlists_combo, gridrow, 0, 1, 2)
+        form1.addWidget(self.targetlists_combo, gridrow, 0, 1, 3)
         gridrow += 1
         form1.addWidget(self.managetargetlists_button, gridrow, 0, 1, 1)
         
@@ -165,11 +133,21 @@ class TargetWidget(QtWidgets.QWidget):
     def clear(self):
         """ """
     
-    def view_changed(self):
+    def set_selected_wavefile(self, wavefile_path):
         """ """
+        self.selected_wavefile_path = wavefile_path
     
     def targetdir_browse(self):
         """ """
+        dirdialog = QtWidgets.QFileDialog(self)
+        dirdialog.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        dirdialog.setFileMode(QtWidgets.QFileDialog.Directory)
+        dirdialog.setOptions(QtWidgets.QFileDialog.ShowDirsOnly |
+                             QtWidgets.QFileDialog.DontResolveSymlinks)
+        dirdialog.setDirectory(str(self.targetdir_edit.text()))
+        dirpath = dirdialog.getExistingDirectory()
+        if dirpath:
+            self.targetdir_edit.setText(dirpath)
     
     def copy_subdir_0(self):
         """ """
