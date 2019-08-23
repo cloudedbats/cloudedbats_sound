@@ -4,7 +4,6 @@
 # Copyright (c) 2019 Arnold Andreasson 
 # License: MIT License (see LICENSE.txt or http://opensource.org/licenses/mit).
 
-import sys
 import numpy
 import pathlib
 from PyQt5 import QtCore
@@ -13,6 +12,9 @@ from PyQt5 import QtWidgets
 
 from matplotlib.backends import backend_qt5agg
 from matplotlib import pyplot
+
+import datetime
+import sound4bats
 
 class PlottingWidget(QtWidgets.QWidget):
     """ """
@@ -125,9 +127,13 @@ class PlottingWidget(QtWidgets.QWidget):
         
     def set_selected_wavefile(self, wavefile_path):
         """ """
-        self.selected_wavefile_path = pathlib.Path(wavefile_path)
-        self.wavefile_name_label.setText(str(self.selected_wavefile_path.name))
-        self.update()
+        try:
+            if wavefile_path:
+                self.selected_wavefile_path = pathlib.Path(wavefile_path)
+                self.wavefile_name_label.setText(str(self.selected_wavefile_path.name))
+                self.update()
+        except:
+            pass
     
     def reset(self):
         """ """
@@ -151,49 +157,67 @@ class PlottingWidget(QtWidgets.QWidget):
     def update(self):
         """ """
         if self.selected_wavefile_path:
-            self.settings()
-            self.data()
+            peaks_file_path = pathlib.Path(str(self.selected_wavefile_path).replace('.wav', '_PEAKS.txt').replace('.WAV', '_PEAKS.txt'))
+            if not peaks_file_path.exists():
+                self.create_peaks_file(self.selected_wavefile_path, peaks_file_path)
+            #
+            self.read_peaks_file(peaks_file_path)
             self.plot()
         else:
             self.figure.clear()
     
-    def settings(self):
+    def read_peaks_file(self, peaks_file_path):
         """ """
         self.sampling_freq_hz = 384000
-        self.freq_min = None
-        self.freq_max = 100
-    
-    def data(self):
-        """ """
+        self.time_min = 0.0
+        self.time_max = 5.0
+        self.freq_min = 0.0
+        self.freq_max = 100.0
+        
         self.time = []
         self.freq = []
         self.amp = []
         self.header = None
         #
-        pulse_peaks_path = pathlib.Path('wavefiles/pulse_peaks.txt')
+        pulse_peaks_path = pathlib.Path(peaks_file_path)
         
         with pulse_peaks_path.open('r') as peaks_file:
             for row in peaks_file:
-                print(row.strip())
-                row_parts = row.split('\t')
+#                 print(row.strip())
+                row_parts = [x.strip() for x in row.split('\t')]
+                row_type= row_parts[0]
                 #
-                if self.header == None:
+                if self.header is None:
                     self.header = row_parts
-                    continue
-                #
-                if row_parts[0] == '1':
-                    if float(row_parts[3]) > -100: # -100 means silent.
-                            self.time.append(float(row_parts[1]))
-                            self.freq.append(float(row_parts[2]))
-                            self.amp.append(float(row_parts[3]))
-        #
+                else:
+                    if row_type == '0':
+                        key = row_parts[5]
+                        value = row_parts[6]
+                        if key == 'rec_framerate_hz':
+                            try: 
+                                self.sampling_freq_hz = float(value)
+                            except: pass
+                        if key == 'rec_lenght_s':
+                            try: 
+                                self.time_max = float(value)
+                            except: pass
+                    
+                    if row_type == '1':
+                        try:
+                            row_time = float(row_parts[1])
+                            row_freq = float(row_parts[2])
+                            row_amp = float(row_parts[3])
+                            if row_amp > -100.0: # -100 means silent.
+                                    self.time.append(row_time)
+                                    self.freq.append(row_freq)
+                                    self.amp.append(row_amp)
+                        except: pass
+    
     def plot_redraw(self):
         """ """
         if len(self.time) < 1:
             return
         
-        self.time_min = 0.0
-        self.time_max = 4.0
         self.freq_min = 0.0
         self.freq_max = 100.0
         
@@ -224,9 +248,9 @@ class PlottingWidget(QtWidgets.QWidget):
         if len(self.time) < 1:
             return
         
-        self.time_min = 0.0
-        self.time_max = 4.0
-        self.freq_min = 0.0
+#         self.time_min = 0.0
+#         self.time_max = 4.0
+#         self.freq_min = 0.0
         self.freq_max = 100.0
         
         slider_center_value = self.slider_center.value() / 100.0 - 0.5 # Value -1 to 1.
@@ -279,6 +303,10 @@ class PlottingWidget(QtWidgets.QWidget):
         self.axes.grid(which='minor', linestyle='-', linewidth='0.5', alpha=0.2)
         #
         self.canvas.draw()
+        
+        
+#         QtWidgets.QApplication.processEvents()
+        
     
     def zoom_in(self):
         """ """
@@ -320,7 +348,6 @@ class PlottingWidget(QtWidgets.QWidget):
     
     def compactview_changed(self):
         """ """
-
     
 #     def test_keyPressEvent(self, event):
 #             if event.key() == QtCore.Qt.Key_Right:
@@ -335,3 +362,73 @@ class PlottingWidget(QtWidgets.QWidget):
 # #                 super().keyPressEvent(event)
 #                 self.keyPressEvent(event)
 
+    def create_peaks_file(self, wavefile_path, peaks_file_path):
+        """ """
+        extractor = sound4bats.PulsePeaksExtractor()
+        extractor.extract_peaks_from_file(wavefile_path)
+        extractor.save_result_table(file_path=str(peaks_file_path))
+        
+        return
+        
+#         print('PulseShapeExtractor test_dynamic_canvas_OLD started. ',  datetime.datetime.now())
+#         
+#     #     file_path = pathlib.Path('../data', 'test_chirp_generator.wav')
+#         file_path = pathlib.Path(wavefile_path)
+#         
+#         with wave.open(str(file_path), 'r') as wave_file:
+#             nchannels = wave_file.getnchannels() # 1=mono, 2=stereo.
+#             sampwidth = wave_file.getsampwidth() # sample width in bytes.
+#             framerate = wave_file.getframerate() # Sampling frequency.
+#             nframes = wave_file.getnframes() # Number of audio frames.
+#             
+#             if int(framerate > 90000):
+#                 framerate_hz = framerate
+#                 lenght_s = int(nframes) / int(framerate)
+#             else:
+#                 # Probably time division by a factor of 10.
+#                 framerate_hz = framerate * 10
+#                 lenght_s = int(nframes) / int(framerate) / 10
+#                 
+#             buffer_raw = wave_file.readframes(int(nframes))
+#     #         buffer_raw = wave_file.readframes(framerate_hz) # Max 1 sec.
+#             signal = numpy.fromstring(buffer_raw, dtype=numpy.int16) / 32767
+#         
+#         print('framerate_hz: ', framerate_hz, ' lenght_s: ', lenght_s)
+#         
+#         extractor = sound4bats.PulsePeaksExtractor(debug=True)
+#         extractor.setup(framerate_hz)
+#         signal_filtered = extractor.filter(signal, filter_low_hz=20000, filter_high_hz=100000)
+#         extractor.new_result_table()
+#         extractor.extract_peaks(signal_filtered)
+#         
+#         peaks_file_path = pathlib.Path(str(self.selected_wavefile_path).replace('.wav', '_PEAKS.txt').replace('.WAV', '_PEAKS.txt'))
+#         
+#         extractor.save_result_table(file_path=str(peaks_file_path))
+#         
+#         print('Length: ', len(extractor.get_result_table()))
+        
+#         # Plot.
+#         time = []
+#         freq = []
+#         amp = []
+#         for row in extractor.get_result_table():
+#             if row[0] == 1:
+#     #             if row[3] > -100: # -100 means silent.
+#                     time.append(float(row[1]))
+#                     freq.append(float(row[2]))
+#                     amp.append(float(row[3]))
+#         #
+#         amp_min = abs(min(amp))
+#         sizes = [((x+amp_min)**1.2) * 0.1 for x in amp]
+#         
+#     #     matplotlib.pyplot.scatter(time, freq, c=sizes, s=sizes, cmap='Blues')
+#         matplotlib.pyplot.scatter(time, freq, c=amp, s=sizes, cmap='Reds')
+#         matplotlib.pyplot.show()
+        
+        print('\n')
+        print('PulseShapeExtractor test_dynamic_canvas_OLD ended. ',  datetime.datetime.now(), '\n')
+    
+       
+        
+        
+        

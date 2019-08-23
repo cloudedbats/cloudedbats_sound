@@ -6,6 +6,7 @@
 
 import numpy
 import pathlib
+import wave
 
 import dsp4bats
 
@@ -30,6 +31,43 @@ class PulsePeaksExtractor():
         self.spectrum_narrow = None
         #
         self.result_table = []
+    
+    def extract_peaks_from_file(self, wavefile_path, 
+                                filter_low_hz=17000, filter_high_hz=None):
+        """ """
+        self.clear()
+        wavefile_path = pathlib.Path(wavefile_path)
+        
+        with wave.open(str(wavefile_path), 'r') as wave_file:
+#             nchannels = wave_file.getnchannels() # 1=mono, 2=stereo.
+#             sampwidth = wave_file.getsampwidth() # sample width in bytes.
+            framerate = wave_file.getframerate() # Sampling frequency.
+            nframes = wave_file.getnframes() # Number of audio frames.
+            
+            if int(framerate > 90000):
+                framerate_hz = framerate
+                lenght_s = int(nframes) / int(framerate)
+            else:
+                # Probably time expansion by a factor of 10.
+                framerate_hz = framerate * 10
+                lenght_s = int(nframes) / int(framerate) / 10
+                
+            buffer_raw = wave_file.readframes(int(nframes))
+    #         buffer_raw = wave_file.readframes(framerate_hz) # Max 1 sec.
+            signal = numpy.fromstring(buffer_raw, dtype=numpy.int16) / 32767
+        
+        self.new_result_table()
+        metadata = {}
+        metadata['rec_framerate_hz'] = str(framerate_hz)
+        metadata['rec_number_of_frames'] = str(nframes)
+        metadata['rec_lenght_s'] = str(lenght_s)
+        metadata['peaks_filter_low_hz'] = str(filter_low_hz)
+        metadata['peaks_filter_high_hz'] = str(filter_high_hz)
+        self.add_metadata(metadata)
+        
+        self.setup(framerate_hz)
+        signal_filtered = self.filter(signal, filter_low_hz=filter_low_hz, filter_high_hz=filter_high_hz)
+        self.extract_peaks(signal_filtered)
     
     def setup(self, sampling_freq_hz=384000):
         """ Setup utils. """
@@ -76,7 +114,8 @@ class PulsePeaksExtractor():
         return signal_filtered
     
     def extract_peaks(self, signal, 
-                      factor_steps_per_s=10000, 
+#                       factor_steps_per_s=10000, 
+                      factor_steps_per_s=1000, 
                       min_amp_level_dbfs = -50, 
                       min_amp_level_relative = False):
         """ """
@@ -154,6 +193,11 @@ class PulsePeaksExtractor():
         """ """
         return self.result_table
     
+    def add_metadata(self, metadata={}):
+        """ """
+        for key, value in metadata.items():
+            self.result_table.append(['0', '', '', '', '', key, value])
+    
     def add_result_row(self, row_type, time_s, freq_hz, amp_dbfs, pulse_ix, info_key='', info_value=''):
         """ """
         freq_khz = numpy.round(freq_hz/1000.0, 1)
@@ -179,7 +223,6 @@ class PulsePeaksExtractor():
 if __name__ == "__main__":
     
     import datetime
-    import wave
     import matplotlib.pyplot
     
     """ """
@@ -195,21 +238,21 @@ if __name__ == "__main__":
         nframes = wave_file.getnframes() # Number of audio frames.
         
         if int(framerate > 90000):
-            frame_rate_hz = framerate
+            framerate_hz = framerate
             lenght_s = int(nframes) / int(framerate)
         else:
             # Probably time division by a factor of 10.
-            frame_rate_hz = framerate * 10
+            framerate_hz = framerate * 10
             lenght_s = int(nframes) / int(framerate) / 10
             
         buffer_raw = wave_file.readframes(int(nframes))
-#         buffer_raw = wave_file.readframes(frame_rate_hz) # Max 1 sec.
+#         buffer_raw = wave_file.readframes(framerate_hz) # Max 1 sec.
         signal = numpy.fromstring(buffer_raw, dtype=numpy.int16) / 32767
     
-    print('frame_rate_hz: ', frame_rate_hz, ' lenght_s: ', lenght_s)
+    print('framerate_hz: ', framerate_hz, ' lenght_s: ', lenght_s)
     
     extractor = PulsePeaksExtractor(debug=True)
-    extractor.setup(frame_rate_hz)
+    extractor.setup(framerate_hz)
     signal_filtered = extractor.filter(signal, filter_low_hz=20000, filter_high_hz=100000)
     extractor.new_result_table()
     extractor.extract_peaks(signal_filtered)

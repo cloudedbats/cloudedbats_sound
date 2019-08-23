@@ -145,6 +145,8 @@ class WavefilesWidget(QtWidgets.QWidget):
     def selected_wavefile_changed(self):
         """ """
         try:
+#             QtWidgets.QApplication.processEvents()
+            
             modelIndex = self.wavefiles_tableview.currentIndex()
             if modelIndex.isValid():
                 wavefile_name = str(self.wavefiles_tableview.model().index(modelIndex.row(), 0).data())
@@ -163,6 +165,7 @@ class WavefilesWidget(QtWidgets.QWidget):
         except Exception as e:
             debug_info = self.__class__.__name__ + ', row  ' + str(sys._getframe().f_lineno)
             desktop_test_app.Logging().error('Exception: (' + debug_info + '): ' + str(e))
+            raise
     
     def previous_wavefile(self):
         """ """
